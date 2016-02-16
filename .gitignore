@@ -1,0 +1,16 @@
+.idea/workspace.xml
+.idea/*
+.idea/hulk.iml
+.idea/*.xml
+env/
+*.pyc
+*.
+*.log*
+*.err*
+*.pkl
+*.out[1-9]
+*.out
+*.swp
+*.pid
+*.txt
+*.xml
