@@ -98,13 +98,6 @@ var previouslySelectedCountry = null;
 //	contains info about what year, what countries, categories, etc that's being visualized
 var selectionData;
 
-//	when the app is idle this will be true
-var idle = false;
-
-//	for svg loading
-//	deprecated, not using svg loading anymore
-var assetList = [];
-
 //	TODO
 //	use underscore and ".after" to load these in order
 //	don't look at me I'm ugly
@@ -246,15 +239,9 @@ function initScene() {
 	loadLayer.style.display = 'none';
 
 	visualizationMesh = new THREE.Object3D();
-	rotating.add(visualizationMesh);	
-	
-
-	// buildGUI();
+	rotating.add(visualizationMesh);
 				
-	highlightCountry( ["AUSTRALIA","UNITED STATES","BELGIUM","CANADA","CHILE","CHINA","COLOMBIA","CZECH REPUBLIC","ECUADOR","FRANCE","GERMANY","INDIA","ISRAEL","ITALY","KOREA, REPUBLIC OF","MALAYSIA","MONTENEGRO","NEW ZEALAND","POLAND","ROMANIA","RUSSIAN FEDERATION","SERBIA","SWITZERLAND","THAILAND","TURKEY","UKRAINE","UNITED KINGDOM","AFGHANISTAN","BAHAMAS","BAHRAIN","BANGLADESH","BELIZE","BERMUDA","BOSNIA AND HERZEGOVINA","BRAZIL","BRUNEI DARUSSALAM","CROATIA","DENMARK","DJIBOUTI","DOMINICAN REPUBLIC","EGYPT","EL SALVADOR","FINLAND","GEORGIA","GUATEMALA","GUYANA","HONG KONG","INDONESIA","IRAQ","JAMAICA","JAPAN","JORDAN","KENYA","KUWAIT","LEBANON","MEXICO","NETHERLANDS","NICARAGUA","NORWAY","OMAN","PAKISTAN","PANAMA","PARAGUAY","PERU","PHILIPPINES","SAUDI ARABIA","SINGAPORE","SPAIN","SWEDEN","TAIWAN","TONGA","TRINIDAD AND TOBAGO","TUNISIA","UGANDA","UNITED ARAB EMIRATES","VENEZUELA, BOLIVARIAN REPUBLIC OF","YEMEN","ARGENTINA","AUSTRIA","BULGARIA","CAMBODIA","HUNGARY","PORTUGAL","SLOVAKIA","ANTIGUA AND BARBUDA","ARUBA","BARBADOS","BOLIVIA, PLURINATIONAL STATE OF","BOTSWANA","CAPE VERDE","COSTA RICA","DOMINICA","FRENCH POLYNESIA","GREECE","HONDURAS","ICELAND","IRELAND","KAZAKHSTAN","LATVIA","LITHUANIA","MACAO","MADAGASCAR","MALTA","NAMIBIA","NEW CALEDONIA","NIGER","SLOVENIA","SOUTH AFRICA","SAINT LUCIA","SAINT VINCENT AND THE GRENADINES","SURINAME","TANZANIA, UNITED REPUBLIC OF","URUGUAY","ZAMBIA","BURKINA FASO","CYPRUS","ESTONIA","GHANA","GREENLAND","HAITI","NIGERIA","QATAR","SRI LANKA","ZIMBABWE","MAURITIUS","IRAN, ISLAMIC REPUBLIC OF","ALGERIA","ANGOLA","ANGUILLA","CAMEROON","CAYMAN ISLANDS","CONGO, THE DEMOCRATIC REPUBLIC OF THE","ETHIOPIA","GRENADA","CÔTE D'IVOIRE","MACEDONIA, THE FORMER YUGOSLAV REPUBLIC OF","MOROCCO","PALAU","SAINT KITTS AND NEVIS","TURKS AND CAICOS ISLANDS","VIET NAM"] );
-	
-		// test for highlighting specific countries
-	// highlightCountry( ["United States", "Switzerland", "China"] );
+	highlightCountry();
 
 	selectedCountry = countryData["CHINA"];
 
@@ -298,8 +285,9 @@ function initScene() {
     camera = new THREE.PerspectiveCamera( 12, window.innerWidth / window.innerHeight, 1, 20000 ); 		        
 	camera.position.z = 1400;
 	camera.position.y = 0;
-	camera.lookAt(scene.width/2, scene.height/2);	
-	scene.add( camera );	  
+	camera.position.x = 100;
+	camera.lookAt(scene.width/2, scene.height/2);
+	scene.add( camera );
 
 	var windowResize = THREEx.WindowResize(renderer, camera)		
 }
@@ -338,12 +326,12 @@ var loadContryGeoData = function( latlonData ){
     //	-----------------------------------------------------------------------------
     //	Load the world geo data json, per country	
 
-	var sphereRad = 1;				
+	var sphereRad = 1;
 	var rad = 100;
 
 	//	iterate through each set of country pins
-	for ( var i in latlonData.countries ) {										
-		var country = latlonData.countries[i];	
+	for ( var i in latlonData.countries ) {
+		var country = latlonData.countries[i];
 		
 		country.countryCode = i;
 		country.countryName = countryLookup[i];			
@@ -364,19 +352,7 @@ var loadContryGeoData = function( latlonData ){
 		country.center = center;
 		countryData[country.countryName] = country;	
 	}
-}	
-
-// var buildConnectionLine = function() {
-// 	// var mesh = getLineMesh( attackData );		
-// 	// visualizationMesh.add(mesh);
-// 	// getLineMesh( attackData );	
-
-	
-// }
-
-
-
-
+}
 
 var getLineMesh = function( attackData ) {
 	var linesGeo = new THREE.Geometry();
@@ -526,52 +502,45 @@ function connectionTwoPoint(fromPoint, toPoint) {
 }
 	
 
-function animate() {	
-
-	//	Disallow roll for now, this is interfering with keyboard input during search
-/*	    	
-	if(keyboard.pressed('o') && keyboard.pressed('shift') == false)
-		camera.rotation.z -= 0.08;		    	
-	if(keyboard.pressed('p') && keyboard.pressed('shift') == false)
-		camera.rotation.z += 0.08;		   
-*/
-
+function animate() {
 	if( rotateTargetX !== undefined && rotateTargetY !== undefined ){
 
 		rotateVX += (rotateTargetX - rotateX) * 0.012;
 		rotateVY += (rotateTargetY - rotateY) * 0.012;
 
-		// var move = new THREE.Vector3( rotateVX, rotateVY, 0 );
-		// var distance = move.length();
-		// if( distance > .01 )
-		// 	distance = .01;
-		// move.normalize();
-		// move.multiplyScalar( distance );
-
-		// rotateVX = move.x;
-		// rotateVy = move.y;		
-
 		if( Math.abs(rotateTargetX - rotateX) < 0.1 && Math.abs(rotateTargetY - rotateY) < 0.1 ){
-			rotateTargetX = undefined;
-			rotateTargetY = undefined;
-		}
-	}
-	
-	rotateX += rotateVX;
-	rotateY += rotateVY;
+			//0.6108652381980153
+			if( Math.abs(rotateTargetX - 0.6) > 0.1) {
+				rotateTargetX = 0.6;
+			}
+			//rotateTargetX = undefined;
+			//rotateTargetY = undefined;
+			rotateTargetY -= 0.01;
 
-	//rotateY = wrap( rotateY, -Math.PI, Math.PI );
-	if(Math.abs(rotateVX)>0.01) {
-		rotateVX *= 0.98;
+			rotateVX *= 0.6;
+			rotateVY *= 0.6;
+		}
+	} else if(!dragging) {
+		rotateTargetX = 0.6;
+		rotateTargetY -= 0.1;
 	}
-	if(Math.abs(rotateVY)>0.01) {
-		rotateVY *= 0.98;
-	}
+
+
+	rotateY += rotateVY;
+	rotateX += rotateVX;
+
+	console.log("rotateX:    " + rotateX);
+	console.log("rotateY:    " + rotateY);
+	console.log("rotateVX:    " + rotateVX);
+	console.log("rotateVY:    " + rotateVY);
+
+	rotateVX *= 0.98;
+	rotateVY *= 0.98;
 
 	if(dragging || rotateTargetX !== undefined ){
 		rotateVX *= 0.6;
 		rotateVY *= 0.6;
-	}	     
+	}
 
 	rotateY += controllers.spin * 0.01;
 
@@ -584,14 +553,14 @@ function animate() {
 	if(rotateX > rotateXMax){
 		rotateX = rotateXMax;
 		rotateVX *= -0.95;
-	}		    			    		   
+	}
 
-	TWEEN.update();		
+	TWEEN.update();
 
 	rotating.rotation.x = rotateX;
-	rotating.rotation.y = rotateY;	
+	rotating.rotation.y = rotateY;
 
-    render();	
+    render();
     		        		       
     requestAnimationFrame( animate );	
 
@@ -612,7 +581,7 @@ function animate() {
 				//	grab the colors from the vertices
 				var geopoints = startpoint.pointlist.slice(0, 5);
 				var pointstart = 0, pointlen = 5;
-				for( s in geopoints ){	
+				for( s in geopoints ){
 					if(Number(s)==geopoints.length-1) {
 						lineColors.push(lineColorend);
 					} else {
@@ -634,7 +603,7 @@ function animate() {
 
 					if(!this.timetip) {
 						this.timetip = timetipnow;
-					} else if(timetipnow - this.timetip > 1000/30) {
+					} else if(timetipnow - this.timetip > 3*1000/60) {
 						this.timetip = timetipnow;
 						if(this.pointstart < this.pointlist.length) {
 							this.pointstart += 1;
@@ -695,15 +664,14 @@ var countryColorMap = {'PE':1,
 'AW':210,'LI':211,'VG':212,'SH':213,'JE':214,'AI':215,'MF_1_':216,'GG':217,'SM':218,'BM':219,'TV':220,'NR':221,'GI':222,'PN':223,'MC':224,'VA':225,
 'IM':226,'GU':227,'SG':228};
 
-function highlightCountry( countries ){	
+function highlightCountry(){
 	var countryCodes = [];
-	for( var i in countries ){
-		var code = findCode(countries[i]);
+	for( var code in countryLookup ){
 		countryCodes.push(code);
 	}
 
 	var ctx = lookupCanvas.getContext('2d');	
-	ctx.clearRect(0,0,256,1);
+	//ctx.clearRect(0,0,256,1);
 
 	//	color index 0 is the ocean, leave it something neutral
 	
@@ -711,33 +679,19 @@ function highlightCountry( countries ){
 	//	all non-countries were being pointed to 10 - bolivia
 	//	the fact that it didn't select was because bolivia shows up as an invalid country due to country name mismatch
 	//	...
-	var pickMask = countries.length == 0 ? 0 : 1;
-	var oceanFill = 10 * pickMask;
-	ctx.fillStyle = 'rgb(' + oceanFill + ',' + oceanFill + ',' + oceanFill +')';
+	ctx.fillStyle = '#00f';
 	ctx.fillRect( 0, 0, 1, 1 );
-
-	// for( var i = 0; i<255; i++ ){
-	// 	var fillCSS = 'rgb(' + i + ',' + 0 + ',' + i + ')';
-	// 	ctx.fillStyle = fillCSS;
-	// 	ctx.fillRect( i, 0, 1, 1 );
-	// }
-
-	// var selectedCountryCode = selectedCountry.countryCode;
 	
 	for( var i in countryCodes ){
 		var countryCode = countryCodes[i];
 		var colorIndex = countryColorMap[ countryCode ];
 
-		var mapColor = countryData[countries[i]].mapColor;
 		// var fillCSS = '#ff0000';
-		var fillCSS = '#333333';
+		// var fillCSS = '#333333';
+		var fillCSS = 'rgb(' + colorIndex + ',' + 0 + ',' + 0 + ')';
 		if( countryCode === "CN" || countryCode === "TW" )
-			fillCSS = '#eeeeee'
-		// if( mapColor !== undefined ){
-		// 	var k = map( mapColor, 0, 200000000, 0, 255 );
-		// 	k = Math.floor( constrain( k, 0, 255 ) );
-		// 	fillCSS = 'rgb(' + k + ',' + k + ',' + k + ')';
-		// }
+			fillCSS = '#fff';
+
 		ctx.fillStyle = fillCSS;
 		ctx.fillRect( colorIndex, 0, 1, 1 );
 	}
@@ -746,7 +700,7 @@ function highlightCountry( countries ){
 }
 
 function getHistoricalData( country ){
-	var history = [];	
+	var history = [];
 
 	var countryName = country.countryName;
 
@@ -754,16 +708,16 @@ function getHistoricalData( country ){
 	var importCategories = selectionData.getImportCategories();
 
 	for( var i in timeBins ){
-		var yearBin = timeBins[i].data;		
+		var yearBin = timeBins[i].data;
 		var value = {imports: 0, exports:0};
 		for( var s in yearBin ){
 			var set = yearBin[s];
 			var categoryName = reverseWeaponLookup[set.wc];
 
 			var exporterCountryName = set.e.toUpperCase();
-			var importerCountryName = set.i.toUpperCase();			
+			var importerCountryName = set.i.toUpperCase();
 			var relevantCategory = ( countryName == exporterCountryName && $.inArray(categoryName, exportCategories ) >= 0 ) || 
-								   ( countryName == importerCountryName && $.inArray(categoryName, importCategories ) >= 0 );				
+								   ( countryName == importerCountryName && $.inArray(categoryName, importCategories ) >= 0 );
 
 			if( relevantCategory == false )
 				continue;
