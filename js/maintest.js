@@ -145,7 +145,7 @@ function initScene() {
 	scene.matrixAutoUpdate = false;		
 	// scene.fog = new THREE.FogExp2( 0xBBBBBB, 0.00003 );		        		       
 
-	scene.add( new THREE.AmbientLight( 0x505050 ) );				
+	scene.add( new THREE.AmbientLight( 0x505050 ) );
 
 	light1 = new THREE.SpotLight( 0xeeeeee, 3 );
 	light1.position.x = 730; 
@@ -679,7 +679,7 @@ function highlightCountry(){
 	//	all non-countries were being pointed to 10 - bolivia
 	//	the fact that it didn't select was because bolivia shows up as an invalid country due to country name mismatch
 	//	...
-	ctx.fillStyle = '#00f';
+	ctx.fillStyle = '#090909';
 	ctx.fillRect( 0, 0, 1, 1 );
 	
 	for( var i in countryCodes ){
