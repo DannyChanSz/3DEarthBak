@@ -67,10 +67,10 @@ var weaponLookup = {
 	'Ammunition'			: 'ammo',
 };
 
-var lineMaterial = new THREE.LineBasicMaterial( 
-	{ 	color: 0xffffff, opacity: 1.0, blending: 
-		THREE.AdditiveBlending, transparent:true, 
-		depthWrite: false, vertexColors: true, 
+var lineMaterial = new THREE.LineBasicMaterial(
+	{ 	color: 0xffffff, opacity: 1.0, blending:
+		THREE.AdditiveBlending, transparent:true,
+		depthWrite: false, vertexColors: true,
 		linewidth: 1 } );
 
 //	a list of the reverse for easy lookup
@@ -79,7 +79,7 @@ for( var i in weaponLookup ){
 	var name = i;
 	var code = weaponLookup[i];
 	reverseWeaponLookup[code] = name;
-}	    	
+}
 
 //	A list of category colors
 var categoryColors = {
@@ -109,7 +109,7 @@ function start( e ){
 	else{
 		//	ensure the map images are loaded first!!
 		mapIndexedImage = new Image();
-		mapIndexedImage.src = 'images/map_indexed.png';
+		mapIndexedImage.src = 'images/map_indexed4.png';
 		mapIndexedImage.onload = function() {
 			mapOutlineImage = new Image();
 			mapOutlineImage.src = 'images/map_outline.png';
@@ -145,20 +145,20 @@ function initScene() {
 	scene.matrixAutoUpdate = false;		
 	// scene.fog = new THREE.FogExp2( 0xBBBBBB, 0.00003 );		        		       
 
-	scene.add( new THREE.AmbientLight( 0x505050 ) );
+	scene.add( new THREE.AmbientLight( 0x333333 ) );
 
-	light1 = new THREE.SpotLight( 0xeeeeee, 3 );
-	light1.position.x = 730; 
+	light1 = new THREE.SpotLight( 0x333333, 3 );
+	light1.position.x = 730;
 	light1.position.y = 520;
 	light1.position.z = 626;
 	light1.castShadow = true;
 	scene.add( light1 );
 
-	light2 = new THREE.PointLight( 0x222222, 14.8 );
+	light2 = new THREE.PointLight( 0x333333, 14.8 );
 	light2.position.x = -640;
 	light2.position.y = -500;
 	light2.position.z = -1000;
-	scene.add( light2 );				
+	scene.add( light2 );
 
 	rotating = new THREE.Object3D();
 	scene.add(rotating);
@@ -184,7 +184,7 @@ function initScene() {
 	// outlinedMapTexture.minFilter = THREE.NearestFilter;
 
 	var uniforms = {
-		'mapIndex': { type: 't', value: 0, texture: indexedMapTexture  },		
+		'mapIndex': { type: 't', value: 0, texture: indexedMapTexture  },
 		'lookup': { type: 't', value: 1, texture: lookupTexture },
 		'outline': { type: 't', value: 2, texture: outlinedMapTexture },
 		'outlineLevel': {type: 'f', value: 1 },
@@ -216,24 +216,24 @@ function initScene() {
 			// map: 		mapGraphic,
 			// lightMap: 	mapGraphic
 		}
-	);				
+	);
 	// backMat.ambient = new THREE.Color(255,255,255);							
-	sphere = new THREE.Mesh( new THREE.SphereGeometry( 100, 40, 40 ), shaderMaterial );				
+	sphere = new THREE.Mesh( new THREE.SphereGeometry( 100, 40, 40 ), shaderMaterial );
 	// sphere.receiveShadow = true;
 	// sphere.castShadow = true;
 	sphere.doubleSided = false;
-	sphere.rotation.x = Math.PI;				
+	sphere.rotation.x = Math.PI;
 	sphere.rotation.y = -Math.PI/2;
 	sphere.rotation.z = Math.PI;
-	sphere.id = "base";	
-	rotating.add( sphere );	
+	sphere.id = "base";
+	rotating.add( sphere );
 
 	// load geo data (country lat lons in this case)
 	console.time('loadGeoData');	
 	loadGeoData( attackTarget );
-	loadContryGeoData( latlonData );	
+	loadContryGeoData( latlonData );
 
-	console.timeEnd('loadGeoData');				
+	console.timeEnd('loadGeoData');
 
 	var loadLayer = document.getElementById('loading');
 	loadLayer.style.display = 'none';
@@ -253,10 +253,10 @@ function initScene() {
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.autoClear = false;
 	
-	renderer.sortObjects = false;		
-	renderer.generateMipmaps = false;					
+	renderer.sortObjects = false;
+	renderer.generateMipmaps = false;
 
-	glContainer.appendChild( renderer.domElement );									
+	glContainer.appendChild( renderer.domElement );
 
 
     //	-----------------------------------------------------------------------------
@@ -500,7 +500,7 @@ function connectionTwoPoint(fromPoint, toPoint) {
 
 	return points;
 }
-	
+
 
 function animate() {
 	if( rotateTargetX !== undefined && rotateTargetY !== undefined ){
@@ -529,10 +529,10 @@ function animate() {
 	rotateY += rotateVY;
 	rotateX += rotateVX;
 
-	console.log("rotateX:    " + rotateX);
-	console.log("rotateY:    " + rotateY);
-	console.log("rotateVX:    " + rotateVX);
-	console.log("rotateVY:    " + rotateVY);
+	//console.log("rotateX:    " + rotateX);
+	//console.log("rotateY:    " + rotateY);
+	//console.log("rotateVX:    " + rotateVX);
+	//console.log("rotateVY:    " + rotateVY);
 
 	rotateVX *= 0.98;
 	rotateVY *= 0.98;
@@ -670,7 +670,7 @@ function highlightCountry(){
 		countryCodes.push(code);
 	}
 
-	var ctx = lookupCanvas.getContext('2d');	
+	var ctx = lookupCanvas.getContext('2d');
 	//ctx.clearRect(0,0,256,1);
 
 	//	color index 0 is the ocean, leave it something neutral
@@ -679,8 +679,8 @@ function highlightCountry(){
 	//	all non-countries were being pointed to 10 - bolivia
 	//	the fact that it didn't select was because bolivia shows up as an invalid country due to country name mismatch
 	//	...
-	ctx.fillStyle = '#090909';
-	ctx.fillRect( 0, 0, 1, 1 );
+	ctx.fillStyle = '#000000';
+	ctx.fillRect( 0, 0, 1, 1 ); // 在map_indexed上，像素为0的是海洋
 	
 	for( var i in countryCodes ){
 		var countryCode = countryCodes[i];
@@ -688,9 +688,9 @@ function highlightCountry(){
 
 		// var fillCSS = '#ff0000';
 		// var fillCSS = '#333333';
-		var fillCSS = 'rgb(' + colorIndex + ',' + 0 + ',' + 0 + ')';
+		var fillCSS = 'rgb(' + colorIndex + ',' + colorIndex + ',' + colorIndex + ')';
 		if( countryCode === "CN" || countryCode === "TW" )
-			fillCSS = '#fff';
+			fillCSS = '#f00';
 
 		ctx.fillStyle = fillCSS;
 		ctx.fillRect( colorIndex, 0, 1, 1 );
