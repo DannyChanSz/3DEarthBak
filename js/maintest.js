@@ -679,7 +679,8 @@ function highlightCountry(){
 	//	all non-countries were being pointed to 10 - bolivia
 	//	the fact that it didn't select was because bolivia shows up as an invalid country due to country name mismatch
 	//	...
-	ctx.fillStyle = '#000000';
+	//ctx.fillStyle = '#00f';
+	ctx.fillStyle = 'rgb(0,55,120)';
 	ctx.fillRect( 0, 0, 1, 1 ); // 在map_indexed上，像素为0的是海洋
 	
 	for( var i in countryCodes ){
@@ -690,7 +691,7 @@ function highlightCountry(){
 		// var fillCSS = '#333333';
 		var fillCSS = 'rgb(' + colorIndex + ',' + colorIndex + ',' + colorIndex + ')';
 		if( countryCode === "CN" || countryCode === "TW" )
-			fillCSS = '#f00';
+			fillCSS = '#0f0';
 
 		ctx.fillStyle = fillCSS;
 		ctx.fillRect( colorIndex, 0, 1, 1 );

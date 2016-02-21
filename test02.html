@@ -122,8 +122,8 @@
 				mask = clamp(mask,0.,1.);
 				float outlineColor = texture2D( outline, vUv ).x * outlineLevel;
 				float diffuse = mask + outlineColor;
-				gl_FragColor = vec4( vec3(diffuse), 1.  );
-				// gl_FragColor = vec4( lookupColor );
+				// gl_FragColor = vec4( vec3(diffuse), 1.  );
+				gl_FragColor = vec4( lookupColor );
 				// gl_FragColor = vec4(texture2D( lookup, vUv ).xyz,1.);
 			}
 		</script>
