@@ -634,7 +634,7 @@ function animate() {
 function render() {	
 	renderer.clear();		    					
     renderer.render( scene, camera );				
-}		   
+}
 
 function findCode(countryName){
 	countryName = countryName.toUpperCase();
