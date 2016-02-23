@@ -121,7 +121,7 @@ function start( e ){
 								loadAttackData(								
 									function(){																	
 										initScene();
-										animate();		
+										animate();
 									}
 								);														
 							}
@@ -147,7 +147,7 @@ function initScene() {
 	//	-----------------------------------------------------------------------------
     //	Let's make a scene		
 	scene = new THREE.Scene();
-	scene.matrixAutoUpdate = false;		
+	scene.matrixAutoUpdate = false;
 	// scene.fog = new THREE.FogExp2( 0xBBBBBB, 0.00003 );		        		       
 
 	scene.add( new THREE.AmbientLight( 0x333333 ) );
@@ -176,7 +176,7 @@ function initScene() {
 	particle.position.y = 0;
 	particle.position.z = 100;
 
-	particle.scale.x = particle.scale.y = 10;
+	particle.scale.x = particle.scale.y = 100;
 	scene.add(particle);
 
 	rotating = new THREE.Object3D();
@@ -185,10 +185,10 @@ function initScene() {
 
 	//rotating.add(particle);
 
-	lookupCanvas = document.createElement('canvas');	
+	lookupCanvas = document.createElement('canvas');
 	lookupCanvas.width = 256;
 	lookupCanvas.height = 1;
-	
+
 	lookupTexture = new THREE.Texture( lookupCanvas );
 	lookupTexture.magFilter = THREE.NearestFilter;
 	lookupTexture.minFilter = THREE.NearestFilter;
@@ -232,14 +232,14 @@ function initScene() {
     // mesh(网格)的基本材质材质
 	backMat = new THREE.MeshBasicMaterial(
 		{
-			// color: 		0xffffff, 
-			// shininess: 	10, 
+			// color: 		0xffffff,
+			// shininess: 	10,
 // 			specular: 	0x333333,
 			// map: 		mapGraphic,
 			// lightMap: 	mapGraphic
 		}
 	);
-	// backMat.ambient = new THREE.Color(255,255,255);							
+	// backMat.ambient = new THREE.Color(255,255,255);
 	sphere = new THREE.Mesh( new THREE.SphereGeometry( 100, 40, 40 ), shaderMaterial );
 	// sphere.receiveShadow = true;
 	// sphere.castShadow = true;
@@ -251,7 +251,7 @@ function initScene() {
 	rotating.add( sphere );
 
 	// load geo data (country lat lons in this case)
-	console.time('loadGeoData');	
+	console.time('loadGeoData');
 	loadGeoData( attackTarget );
 	loadContryGeoData( latlonData );
 
@@ -263,7 +263,7 @@ function initScene() {
 	visualizationMesh = new THREE.Object3D();
 	visualizationMesh.id = 'earth';
 	rotating.add(visualizationMesh);
-				
+
 	highlightCountry();
 
 	selectedCountry = countryData["CHINA"];
@@ -275,7 +275,7 @@ function initScene() {
 	renderer = new THREE.WebGLRenderer({antialias:false});
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.autoClear = false;
-	
+
 	renderer.sortObjects = false;
 	renderer.generateMipmaps = false;
 
@@ -287,21 +287,21 @@ function initScene() {
 	document.addEventListener( 'mousemove', onDocumentMouseMove, true );
 	document.addEventListener( 'windowResize', onDocumentResize, false );
 
-	//masterContainer.addEventListener( 'mousedown', onDocumentMouseDown, true );	
-	//masterContainer.addEventListener( 'mouseup', onDocumentMouseUp, false );	
-	document.addEventListener( 'mousedown', onDocumentMouseDown, true );	
-	document.addEventListener( 'mouseup', onDocumentMouseUp, false );	
-	
-	masterContainer.addEventListener( 'click', onClick, true );	
+	//masterContainer.addEventListener( 'mousedown', onDocumentMouseDown, true );
+	//masterContainer.addEventListener( 'mouseup', onDocumentMouseUp, false );
+	document.addEventListener( 'mousedown', onDocumentMouseDown, true );
+	document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+
+	masterContainer.addEventListener( 'click', onClick, true );
 	masterContainer.addEventListener( 'mousewheel', onMouseWheel, false );
-	
-	//	firefox	
+
+	//	firefox
 	masterContainer.addEventListener( 'DOMMouseScroll', function(e){
 		    var evt=window.event || e; //equalize event object
     		onMouseWheel(evt);
 	}, false );
 
-	document.addEventListener( 'keydown', onKeyDown, false);												    			    	
+	document.addEventListener( 'keydown', onKeyDown, false);
 
     //	-----------------------------------------------------------------------------
     //	Setup our camera
@@ -312,7 +312,8 @@ function initScene() {
 	camera.lookAt(scene.width/2, scene.height/2);
 	scene.add( camera );
 
-	var windowResize = THREEx.WindowResize(renderer, camera)		
+	var windowResize = THREEx.WindowResize(renderer, camera);
+	render();
 }
 
 var initRotate = function(selectedCountry) {
@@ -950,9 +951,9 @@ var buildDataVizGeometries = function( linearData ){
 		//	how to make this work?
 		// loadLayer.innerHTML = 'loading data for ' + year + '...';
 		// console.log(loadLayer.innerHTML);
-	}			
+	}
 
-	loadLayer.style.display = 'none';	
+	loadLayer.style.display = 'none';
 }
 
 

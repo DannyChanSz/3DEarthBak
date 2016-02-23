@@ -23,7 +23,7 @@ scene.add( camera );
 //camera.position.z = 1000;
 //scene.add(camera);
 
-renderer = new THREE.CanvasRenderer();
+renderer = new THREE.WebGLRenderer({});
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 // the renderer's canvas domElement is added to the body
@@ -37,16 +37,31 @@ function particleRender(context) {
     //context.fillStyle = getRandomColor();
     context.fill();
 };
+function generateSprite() {
 
-material = new THREE.ParticleCanvasMaterial( {
-    // color: 0xffffff,
-    // color: "0xff0000",
-    // color:    new THREE.Color(getRandomColor()),
-    color:    '0xff0000',
-    program: particleRender
+    var canvas = document.createElement( 'canvas' );
+    canvas.width = 16;
+    canvas.height = 16;
+
+    var context = canvas.getContext( '2d' );
+    var gradient = context.createRadialGradient( canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2 );
+    gradient.addColorStop( 0, 'rgba(255,255,255,1)' );
+    gradient.addColorStop( 0.2, 'rgba(0,255,255,1)' );
+    gradient.addColorStop( 0.4, 'rgba(0,0,64,1)' );
+    gradient.addColorStop( 1, 'rgba(0,0,0,1)' );
+
+    context.fillStyle = gradient;
+    context.fillRect( 0, 0, canvas.width, canvas.height );
+
+    return canvas;
+
+}
+material = new THREE.ParticleBasicMaterial( {
+    map: new THREE.Texture( generateSprite() ),
+    blending: THREE.AdditiveBlending
 });
 // make the particle
-particle = new THREE.Particle(material);
+particle = new THREE.Sprite(material);
 
 // give it a random x and y position between -500 and 500
 particle.position.x = 200;
