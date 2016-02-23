@@ -131,8 +131,13 @@ function start( e ){
 			};			
 		};		
 	};
-}	
-
+}
+function particleRender(context) {
+	context.beginPath();
+	context.arc(0, 0, 1, 0, 2*Math.PI, true);
+	//context.fillStyle = getRandomColor();
+	context.fill();
+};
 
 
 //	-----------------------------------------------------------------------------
@@ -160,8 +165,25 @@ function initScene() {
 	light2.position.z = -1000;
 	scene.add( light2 );
 
+	var parMaterial = new THREE.ParticleCanvasMaterial({
+		color: '0xff0000',
+		program: particleRender
+	});
+
+	particle = new THREE.Particle(parMaterial);
+
+	particle.position.x = 200;
+	particle.position.y = 0;
+	particle.position.z = 100;
+
+	particle.scale.x = particle.scale.y = 10;
+	scene.add(particle);
+
 	rotating = new THREE.Object3D();
+
 	scene.add(rotating);
+
+	//rotating.add(particle);
 
 	lookupCanvas = document.createElement('canvas');	
 	lookupCanvas.width = 256;
@@ -239,6 +261,7 @@ function initScene() {
 	loadLayer.style.display = 'none';
 
 	visualizationMesh = new THREE.Object3D();
+	visualizationMesh.id = 'earth';
 	rotating.add(visualizationMesh);
 				
 	highlightCountry();
@@ -568,7 +591,7 @@ function animate() {
 	THREE.SceneUtils.traverseHierarchy( rotating, 
 		// 这里有一个bug需要修复 （Uncaught TypeError: Cannot read property 'children' of undefined）
 		function(mesh) {
-			if(mesh.id && mesh.id == "36" && attackData.length>0 ) {
+			if(mesh.id && mesh.id == "earth" && attackData.length>0 ) {
 				var startpoint = attackData.pop();
 				loadGeoData( startpoint );
 
@@ -627,8 +650,7 @@ function animate() {
 	for( var i in markers ){
 		var marker = markers[i];
 		marker.update();
-	}		    	
-
+	}
 }
 
 function render() {	
