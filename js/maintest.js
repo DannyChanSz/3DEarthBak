@@ -71,7 +71,9 @@ var lineMaterial = new THREE.LineBasicMaterial(
 	{ 	color: 0xffffff, opacity: 1.0, blending:
 		THREE.AdditiveBlending, transparent:true,
 		depthWrite: false, vertexColors: true,
-		linewidth: 1 } );
+		linewidth: 4
+	} );
+lineMaterial.linewidth = 4;
 
 //	a list of the reverse for easy lookup
 var reverseWeaponLookup = new Object();
@@ -109,7 +111,7 @@ function start( e ){
 	else{
 		//	ensure the map images are loaded first!!
 		mapIndexedImage = new Image();
-		mapIndexedImage.src = 'images/map_indexed4.png';
+		mapIndexedImage.src = 'images/map_indexed.png';
 		mapIndexedImage.onload = function() {
 			mapOutlineImage = new Image();
 			mapOutlineImage.src = 'images/map_outline.png';
@@ -165,19 +167,36 @@ function initScene() {
 	light2.position.z = -1000;
 	scene.add( light2 );
 
-	var parMaterial = new THREE.ParticleCanvasMaterial({
-		color: '0xff0000',
-		program: particleRender
-	});
 
-	particle = new THREE.Particle(parMaterial);
+// 创建粒子geometry
+	var particleCount = 8000,
+		particles = new THREE.Geometry(),
+		pMaterial =
+			new THREE.ParticleBasicMaterial({
+				color: 0xFFFFFF,
+				size: 4
+			});
+// 依次创建单个粒子
+	for(var p = 0; p < particleCount; p++) {
+// 粒子范围在-250到250之间
+		var pX = Math.random() * 2000 - 1000,
+			pY = Math.random() * 2000 - 250,
+			pZ = -Math.random() * 1000 - 250,
+			particle = new THREE.Vector3(pX, pY, pZ);
 
-	particle.position.x = 200;
-	particle.position.y = 0;
-	particle.position.z = 100;
+// 将粒子加入粒子geometry
+		particles.vertices.push(particle);
+	}
+// 创建粒子系统
+	var particleSystem =
+		new THREE.ParticleSystem(
+			particles,
+			pMaterial);
 
-	particle.scale.x = particle.scale.y = 100;
-	scene.add(particle);
+	particleSystem.sortParticles = true;
+
+// 将粒子系统加入场景
+	scene.add(particleSystem);
 
 	rotating = new THREE.Object3D();
 
@@ -378,64 +397,6 @@ var loadContryGeoData = function( latlonData ){
 	}
 }
 
-var getLineMesh = function( attackData ) {
-	var linesGeo = new THREE.Geometry();
-	var lineColors = [];
-	var lineMaterial = new THREE.LineBasicMaterial( 
-		{ 	color: 0xffffff, opacity: 1.0, blending: 
-			THREE.AdditiveBlending, transparent:true, 
-			depthWrite: false, vertexColors: true, 
-			linewidth: 1 } );	
-
-	var splineOutline;
-
-	for( i in attackData ){
-		var set = attackData[i];
-
-		var lineColor = new THREE.Color( 0xe6be14 );
-
-		var lastColor = lineColor;
-		//	grab the colors from the vertices
-		var geopoints = set.pointlist.slice(0, 5);
-		var pointstart = 0, pointlen = 5;
-		for( s in geopoints ){	
-			lineColors.push(lineColor);
-			lastColor = lineColor;
-		}
-
-		var curveGeometry = THREE.Curve.Utils.createLineGeometry( geopoints );
-		curveGeometry.colors = lineColors;
-
-		splineOutline = new THREE.Line( curveGeometry, lineMaterial);
-		splineOutline.pointlist = set.pointlist;
-		splineOutline.pointstart = pointstart;
-		splineOutline.pointlen = pointlen;
-
-		splineOutline.renderDepth = false;
-
-		splineOutline.update = function() {
-			var timetipnow = new Date().getTime();
- 
-			if(!this.timetip) {
-				this.timetip = timetipnow;
-			} else if(timetipnow - this.timetip > 1000/240) {
-				this.timetip = timetipnow;
-				if(this.pointstart < this.pointlist.length) {
-					this.pointstart += 1;
-					this.geometry.vertices = this.pointlist.slice(this.pointstart, this.pointstart + this.pointlen);
-					this.geometry.verticesNeedUpdate = true;
-				} else {
-					this.parent.remove(this);
-				}
-			}
-		}
-
-		visualizationMesh.add(splineOutline);
-	}
-}
-
-
-
 var loadGeoData = function( attackpoint ){
 	var rad = 100;
 
@@ -605,6 +566,8 @@ function animate() {
 				//	grab the colors from the vertices
 				var geopoints = startpoint.pointlist.slice(0, 5);
 				var pointstart = 0, pointlen = 5;
+				var headpoint = startpoint.pointlist.slice(0, 1)
+				//console.log(headpoint);
 				for( s in geopoints ){
 					if(Number(s)==geopoints.length-1) {
 						lineColors.push(lineColorend);
@@ -625,6 +588,7 @@ function animate() {
 				splineOutline.update = function() {
 					var timetipnow = new Date().getTime();
 
+
 					if(!this.timetip) {
 						this.timetip = timetipnow;
 					} else if(timetipnow - this.timetip > 3*1000/60) {
@@ -632,12 +596,46 @@ function animate() {
 						if(this.pointstart < this.pointlist.length) {
 							this.pointstart += 1;
 							this.geometry.vertices = this.pointlist.slice(this.pointstart, this.pointstart + this.pointlen);
+
+
+							var particleSystem = this.children[0];
+							var particle = this.particles.vertices[0];
+							var pointend = (this.pointstart + this.pointlen) < this.pointlist.length? this.pointstart + this.pointlen : this.pointlist.length-1;
+							var handpoint = this.pointlist.slice(pointend, pointend+1)[0];
+							particle.x = handpoint.x;
+							particle.y = handpoint.y;
+							particle.z = handpoint.z;
+							particleSystem.geometry.__dirtyVertices = true;
+
 							this.geometry.verticesNeedUpdate = true;
 						} else {
 							this.parent.remove(this);
 						}
 					}
 				}
+
+
+
+				var particles = new THREE.Geometry(),
+					pMaterial =
+						new THREE.ParticleBasicMaterial({
+							color: 0xFF0000,
+							size: 10
+						});
+
+				var particle = headpoint[0];
+
+				particles.vertices.push(particle);
+
+				var particleSystem =
+					new THREE.ParticleSystem(
+						particles,
+						pMaterial);
+
+				particleSystem.sortParticles = true;
+
+				splineOutline.add(particleSystem);
+				splineOutline.particles = particles;
 
 				mesh.add(splineOutline);
 			}
@@ -702,8 +700,9 @@ function highlightCountry(){
 	//	all non-countries were being pointed to 10 - bolivia
 	//	the fact that it didn't select was because bolivia shows up as an invalid country due to country name mismatch
 	//	...
-	//ctx.fillStyle = '#00f';
-	ctx.fillStyle = 'rgb(0,55,120)';
+	//ctx.fillStyle = 'rgb(19, 33, 62)';
+	//ctx.fillStyle = 'rgb(0,55,120)';
+	ctx.fillStyle = 'rgb(0,20,60)';
 	ctx.fillRect( 0, 0, 1, 1 ); // 在map_indexed上，像素为0的是海洋
 	
 	for( var i in countryCodes ){
@@ -714,7 +713,8 @@ function highlightCountry(){
 		// var fillCSS = '#333333';
 		var fillCSS = 'rgb(' + colorIndex + ',' + colorIndex + ',' + colorIndex + ')';
 		if( countryCode === "CN" || countryCode === "TW" )
-			fillCSS = '#0f0';
+			//fillCSS = '#0f0';
+			fillCSS = 'rgb(46, 74, 36)';
 
 		ctx.fillStyle = fillCSS;
 		ctx.fillRect( colorIndex, 0, 1, 1 );

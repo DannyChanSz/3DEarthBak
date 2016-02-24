@@ -23,56 +23,44 @@ scene.add( camera );
 //camera.position.z = 1000;
 //scene.add(camera);
 
-renderer = new THREE.WebGLRenderer({});
+renderer = new THREE.WebGLRenderer({ antialias: false });
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 // the renderer's canvas domElement is added to the body
 document.body.appendChild(renderer.domElement);
 
-var particle, material;
+// 创建粒子geometry
+var particleCount = 2000,
+    particles = new THREE.Geometry(),
+    pMaterial =
+        new THREE.ParticleBasicMaterial({
+            color: 0xFFFFFF,
+            size: 10,
+            map: THREE.ImageUtils.loadTexture('images/start.png'),
+            blending: THREE.AdditiveBlending,
+            transparent: true
+        });
+// 依次创建单个粒子
+for(var p = 0; p < particleCount; p++) {
+// 粒子范围在-250到250之间
+    var pX = Math.random() * 500 - 250,
+        pY = Math.random() * 500 - 250,
+        pZ = Math.random() * 500 - 250,
+        particle = new THREE.Vector3(pX, pY, pZ);
 
-function particleRender(context) {
-    context.beginPath();
-    context.arc(0, 0, 1, 0, 2*Math.PI, true);
-    //context.fillStyle = getRandomColor();
-    context.fill();
-};
-function generateSprite() {
-
-    var canvas = document.createElement( 'canvas' );
-    canvas.width = 16;
-    canvas.height = 16;
-
-    var context = canvas.getContext( '2d' );
-    var gradient = context.createRadialGradient( canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2 );
-    gradient.addColorStop( 0, 'rgba(255,255,255,1)' );
-    gradient.addColorStop( 0.2, 'rgba(0,255,255,1)' );
-    gradient.addColorStop( 0.4, 'rgba(0,0,64,1)' );
-    gradient.addColorStop( 1, 'rgba(0,0,0,1)' );
-
-    context.fillStyle = gradient;
-    context.fillRect( 0, 0, canvas.width, canvas.height );
-
-    return canvas;
-
+// 将粒子加入粒子geometry
+    particles.vertices.push(particle);
 }
-material = new THREE.ParticleBasicMaterial( {
-    map: new THREE.Texture( generateSprite() ),
-    blending: THREE.AdditiveBlending
-});
-// make the particle
-particle = new THREE.Sprite(material);
+// 创建粒子系统
+var particleSystem =
+    new THREE.ParticleSystem(
+        particles,
+        pMaterial);
 
-// give it a random x and y position between -500 and 500
-particle.position.x = 200;
-particle.position.y = 0;
-particle.position.z = 100;
+particleSystem.sortParticles = true;
 
-// scale it up a bit
-particle.scale.x = particle.scale.y = 10;
-
-// add it to the scene
-scene.add(particle);
+// 将粒子系统加入场景
+scene.add(particleSystem);
 
 // and to the array of particles.
 //particles.push(particle);
