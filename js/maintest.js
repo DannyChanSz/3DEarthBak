@@ -43,25 +43,6 @@ var selectableCountries = [];
 var attackTarget = { lon: 121.36, lat: 31.21 };
 //31.2197050000,121.3676340000
 
-/*
-	930100 – military weapons, and includes some light weapons and artillery as well as machine guns and assault rifles etc.  
-	930190 – military firearms – eg assault rifles, machineguns (sub, light, heavy etc), combat shotguns, machine pistols etc
-	930200 – pistols and revolvers
-	930320 – Sporting shotguns (anything that isn’t rated as a military item).
-	930330 – Sporting rifles (basically anything that isn’t fully automatic).
-	930621 – shotgun shells
-	930630 – small caliber ammo (anything below 14.5mm which isn’t fired from a shotgun.
-*/
-
-//	a list of weapon 'codes'
-//	now they are just strings of categories
-//	Category Name : Category Code
-var weaponLookup = {
-	'Military Weapons' 		: 'mil',
-	'Civilian Weapons'		: 'civ',
-	'Ammunition'			: 'ammo',
-};
-
 var lineMaterial = new THREE.LineBasicMaterial(
 	{ 	color: 0xffffff, opacity: 1.0, blending:
 		THREE.AdditiveBlending, transparent:true,
@@ -70,20 +51,8 @@ var lineMaterial = new THREE.LineBasicMaterial(
 	} );
 lineMaterial.linewidth = 4;
 
-//	a list of the reverse for easy lookup
-var reverseWeaponLookup = new Object();
-for( var i in weaponLookup ){
-	var name = i;
-	var code = weaponLookup[i];
-	reverseWeaponLookup[code] = name;
-}
-
-var exportColor = 0xdd380c;
-var importColor = 0x154492;
-
 //	the currently selected country
 var selectedCountry = null;
-var previouslySelectedCountry = null;
 
 //	contains info about what year, what countries, categories, etc that's being visualized
 var selectionData;
@@ -149,39 +118,9 @@ function initScene() {
 	light2.position.z = -1000;
 	scene.add( light2 );
 
-
-// 创建粒子geometry
-	var particleCount = 8000,
-		particles = new THREE.Geometry(),
-		pMaterial =
-			new THREE.ParticleBasicMaterial({
-				color: 0xFFFFFF,
-				size: 4
-			});
-// 依次创建单个粒子
-	for(var p = 0; p < particleCount; p++) {
-// 粒子范围在-250到250之间
-		var pX = Math.random() * 2000 - 1000,
-			pY = Math.random() * 2000 - 250,
-			pZ = -Math.random() * 1000 - 250,
-			particle = new THREE.Vector3(pX, pY, pZ);
-
-// 将粒子加入粒子geometry
-		particles.vertices.push(particle);
-	}
-// 创建粒子系统
-	var particleSystem =
-		new THREE.ParticleSystem(
-			particles,
-			pMaterial);
-
-	particleSystem.sortParticles = true;
-
-// 将粒子系统加入场景
-	scene.add(particleSystem);
+	initBackgound(scene);
 
 	rotating = new THREE.Object3D();
-
 	scene.add(rotating);
 
 	//rotating.add(particle);
@@ -216,7 +155,6 @@ function initScene() {
 
 	// 自定义着色器创建材质类型
 	var shaderMaterial = new THREE.ShaderMaterial( {
-
 		uniforms: 		uniforms,
 		// attributes:     attributes,
 		vertexShader:   document.getElementById( 'globeVertexShader' ).textContent,
@@ -224,23 +162,6 @@ function initScene() {
 		// sizeAttenuation: true,
 	});
 
-
-    //	-----------------------------------------------------------------------------
-    //	Create the backing (sphere)
-    // var mapGraphic = new THREE.Texture(worldCanvas);//THREE.ImageUtils.loadTexture("images/map.png");
-    // backTexture =  mapGraphic;
-    // mapGraphic.needsUpdate = true;
-    // mesh(网格)的基本材质材质
-	backMat = new THREE.MeshBasicMaterial(
-		{
-			// color: 		0xffffff,
-			// shininess: 	10,
-// 			specular: 	0x333333,
-			// map: 		mapGraphic,
-			// lightMap: 	mapGraphic
-		}
-	);
-	// backMat.ambient = new THREE.Color(255,255,255);
 	sphere = new THREE.Mesh( new THREE.SphereGeometry( 100, 40, 40 ), shaderMaterial );
 	// sphere.receiveShadow = true;
 	// sphere.castShadow = true;
@@ -253,8 +174,11 @@ function initScene() {
 
 	// load geo data (country lat lons in this case)
 	console.time('loadGeoData');
+
 	loadGeoData( attackTarget );
 	loadContryGeoData( latlonData );
+	console.log('countryData:::::');
+	console.log(countryData);
 
 	console.timeEnd('loadGeoData');
 
@@ -312,6 +236,41 @@ function initScene() {
 
 	var windowResize = THREEx.WindowResize(renderer, camera);
 	render();
+
+	setInterval('getAttackData()', 5000);
+}
+
+var initBackgound = function (scene) {
+
+	// 创建粒子geometry
+	var particleCount = 8000,
+		particles = new THREE.Geometry(),
+		pMaterial =
+			new THREE.ParticleBasicMaterial({
+				color: 0xFFFFFF,
+				size: 4
+			});
+	// 依次创建单个粒子
+	for(var p = 0; p < particleCount; p++) {
+	// 粒子范围在-250到250之间
+		var pX = Math.random() * 2000 - 1000,
+			pY = Math.random() * 2000 - 250,
+			pZ = -Math.random() * 1000 - 250,
+			particle = new THREE.Vector3(pX, pY, pZ);
+
+	// 将粒子加入粒子geometry
+		particles.vertices.push(particle);
+	}
+	// 创建粒子系统
+	var particleSystem =
+		new THREE.ParticleSystem(
+			particles,
+			pMaterial);
+
+	particleSystem.sortParticles = true;
+
+	// 将粒子系统加入场景
+	scene.add(particleSystem);
 }
 
 var initRotate = function(selectedCountry) {
@@ -395,10 +354,9 @@ var loadGeoData = function( attackpoint ){
 	attackpoint.center = center;
 }	
 
-var vec3_origin = new THREE.Vector3(0,0,0);
-
 // toPoint 31.2197050000,121.3676340000
 function connectionTwoPoint(fromPoint, toPoint) {
+	var vec3_origin = new THREE.Vector3(0,0,0);
 
 	var distanceBetweenTwoPoint = fromPoint.center.clone().subSelf(toPoint.center).length();
 
@@ -477,8 +435,6 @@ function animate() {
 			if( Math.abs(rotateTargetX - 0.6) > 0.1) {
 				rotateTargetX = 0.6;
 			}
-			//rotateTargetX = undefined;
-			//rotateTargetY = undefined;
 			rotateTargetY -= 0.01;
 
 			rotateVX *= 0.6;
@@ -532,6 +488,7 @@ function animate() {
 	THREE.SceneUtils.traverseHierarchy( rotating, 
 		// 这里有一个bug需要修复 （Uncaught TypeError: Cannot read property 'children' of undefined）
 		function(mesh) {
+			//if(mesh && mesh.id && mesh.id == "earth" && attackData.length>0 ) {
 			if(mesh.id && mesh.id == "earth" && attackData.length>0 ) {
 				var startpoint = attackData.pop();
 				loadGeoData( startpoint );
@@ -542,11 +499,11 @@ function animate() {
 				var lineColor = new THREE.Color( 0xe6be14 );
 				var lineColorend = new THREE.Color( 0xff0000 );
 
-				//	grab the colors from the vertices
+				// grab the colors from the vertices
 				var geopoints = startpoint.pointlist.slice(0, 5);
 				var pointstart = 0, pointlen = 5;
-				var headpoint = startpoint.pointlist.slice(0, 1)
-				//console.log(headpoint);
+				var headpoint = startpoint.pointlist.slice(0, 1);
+				// console.log(headpoint);
 				for( s in geopoints ){
 					if(Number(s)==geopoints.length-1) {
 						lineColors.push(lineColorend);
@@ -566,7 +523,6 @@ function animate() {
 				splineOutline.renderDepth = false;
 				splineOutline.update = function() {
 					var timetipnow = new Date().getTime();
-
 
 					if(!this.timetip) {
 						this.timetip = timetipnow;
@@ -593,11 +549,9 @@ function animate() {
 					}
 				}
 
-
-
+				// 攻击线条端点初始化
 				var particles = new THREE.Geometry(),
-					pMaterial =
-						new THREE.ParticleBasicMaterial({
+					pMaterial = new THREE.ParticleBasicMaterial({
 							color: 0xFF0000,
 							size: 10
 						});
